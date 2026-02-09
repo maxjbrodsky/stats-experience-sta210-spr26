@@ -1,0 +1,84 @@
+---
+title: "Data exploration"
+format: html
+editor: visual
+---
+
+```{r}
+#| label: load data
+
+
+# Using R
+# Option 1: tidytuesdayR R package 
+install.packages("tidytuesdayR")
+
+tuesdata <- tidytuesdayR::tt_load('2025-06-24')
+## OR
+# tuesdata <- tidytuesdayR::tt_load(2025, week = 25)
+
+cases_month <- tuesdata$cases_month
+cases_year <- tuesdata$cases_year
+
+write.csv(cases_year, "casesdf")
+
+# Option 2: Read directly from GitHub
+
+# cases_month <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-06-24/cases_month.csv')
+# cases_year <- readr::read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/main/data/2025/2025-06-24/cases_year.csv')
+```
+
+```{r}
+#| label: load-packages
+
+library(tidyverse)
+library(rsconnect)
+library(shiny)
+library(leaflet)
+library(sf)
+# library(leaflet.extras)
+
+```
+
+```{r}
+#| label: summary-stats-year
+
+cases_year_counts <- cases_year |>
+  count(country) 
+
+summed_cases <- cases_year |>
+    group_by(country) |>
+      summarise(
+        sum_measles = sum(measles_total, na.rm = TRUE),
+        sum_rubella = sum(rubella_total, na.rm = TRUE),
+        sum_m_r = sum_measles + sum_rubella,
+        sum_discard = sum(discarded_cases, na.rm = TRUE),
+        sum_total_discard = sum_measles + sum_rubella + sum_discard,
+        sum_lab_m = sum(measles_lab_confirmed, na.rm = TRUE),
+        sum_epi_m = sum(measles_epi_linked, na.rm = TRUE),
+        sum_clinic_m = sum(measles_clinical, na.rm = TRUE),
+        sum_lab_r = sum(rubella_lab_confirmed, na.rm = TRUE),
+        sum_epi_r = sum(rubella_epi_linked, na.rm = TRUE),
+        sum_clinic_r = sum(rubella_clinical, na.rm = TRUE),
+        sum_pop_m = sum(measles_incidence_rate_per_1000000_total_population, na.rm = TRUE),
+        sum_pop_r = sum(rubella_incidence_rate_per_1000000_total_population, na.rm = TRUE),
+        sum_pop_mr = sum_pop_r + sum_pop_m
+      )
+
+cases_year |>
+  summarise(
+    min_year = min(year),
+    max_year = max(year)
+  )
+
+write.csv(summed_cases, file = "summed_cases.csv", row.names = FALSE)
+```
+
+```{r}
+# Get the column names
+column_names <- colnames(cases_year)
+
+# Print the result
+print(column_names)
+# Output: [1] "ID"   "Name" "Age"
+
+```

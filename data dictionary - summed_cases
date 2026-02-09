@@ -1,0 +1,38 @@
+country: country name
+
+sum_measles: Total number measles cases 
+(the sum of clinically-compatible, epidemiologically linked and laboratory-confirmed cases) for each country across all years
+
+sum_rubella: Total rubella cases 
+(the sum of clinically-compatible, epidemiologically linked and laboratory-confirmed cases) for each country across all years
+
+sum_m_r: sum_measles + sum_rubella
+
+sum_discard: Discarded cases 
+(A suspected case that has been investigated and discarded as a non-measles (and non-rubella)) for each country across all years
+
+sum_total_discard: total cases (both suspected and discarded), for each country across all years
+
+sum_lab_m: Laboratory-confirmed measles cases 
+(A suspected case of measles that has been confirmed positive by testing in a proficient laboratory, 
+and vaccine-associated illness has been ruled out), for each country across all years
+
+sum_epi_m: Epidemiologically-linked measles cases 
+(A suspected case of measles that has not been confirmed by a laboratory, but was geographically and temporally 
+related with dates of rash onset occurring 7–23 days apart from a laboratory-confirmed case or 
+another epidemiologically linked measles case), for each country across all years
+
+sum_clinic_m: Clinically-compatible measles cases 
+(A suspected case with fever and maculopapular (non-vesicular) rash and at least one of cough, coryza or conjunctivitis, 
+but no adequate clinical specimen was taken and the case has not been linked epidemiologically to a laboratory-confirmed case 
+of measles or other communicable disease), for each country across all years
+
+sum_lab_r: Laboratory-confirmed rubella cases, for each country across all years
+
+sum_epi_r: Epidemiologically-linked rubella cases, for each country across all years
+
+sum_clinic_r: Clinically-compatible rubella cases, for each country across all years
+
+sum_pop_m: Measles cases per million population, for each country across all years
+
+sum_pop_r: Rubella cases per million population, for each country across all years
