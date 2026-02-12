@@ -75,7 +75,7 @@ write.csv(summed_cases, file = "summed_cases.csv", row.names = FALSE)
 
 ```{r}
 # Get the column names
-column_names <- colnames(cases_year)
+column_names <- colnames(cases)
 
 # Print the result
 print(column_names)

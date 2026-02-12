@@ -29,6 +29,7 @@ summed_cases <- read.csv("summed_cases.csv")
 #| label: join-data
 
 cases <- full_join(cases_year, summed_cases, by = "country")
+write_csv(cases, "cases.csv")
 
 ```
 
