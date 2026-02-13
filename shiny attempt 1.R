@@ -23,9 +23,9 @@ ui <- fluidPage(
       pickerInput(
         inputId = "disease",
         label = "Disease",
-        choices = c("Measles", "Rubella"),
-        multiple = TRUE,
-        selected = c("Measles", "Rubella"),
+        choices = c("Measles", "Rubella", "Both"),
+        multiple = FALSE,
+        selected = c("Both"),
         options = list(`actions-box` = TRUE)
       ),
       pickerInput(
@@ -58,10 +58,13 @@ server <- function(input, output, session) {
   observeEvent(input$disease, {
     choices <- c()
     if ("Measles" %in% input$disease) {
-      choices <- c(choices, "Total", "Lab Confirmed", "Epi Linked", "Clinical")
+      choices <- c(choices, "Lab Confirmed", "Epi Linked", "Clinical")
     }
     if ("Rubella" %in% input$disease) {
-      choices <- c(choices, "Total", "Lab Confirmed", "Epi Linked", "Clinical")
+      choices <- c(choices, "Lab Confirmed", "Epi Linked", "Clinical")
+    }
+    if ("Both" %in% input$disease) {
+      choices <- c(choices, "Lab Confirmed", "Epi Linked", "Clinical")
     }
     updatePickerInput(session, "case_type", choices = unique(choices), selected = unique(choices))
   }, ignoreNULL = FALSE)
@@ -70,7 +73,8 @@ server <- function(input, output, session) {
     leaflet(world) |> addTiles()
   })
 
-  reactive({
+  observe({
+    
     req(input$disease, input$case_type, input$year)
 
     filtered <- cases |>
@@ -78,26 +82,29 @@ server <- function(input, output, session) {
 
     selected_cols <- c()
     if ("Measles" %in% input$disease) {
-      if ("Total" %in% input$case_type) selected_cols <- c(selected_cols, "measles_total")
-      if ("Lab Confirmed" %in% input$case_type) selected_cols <- c(selected_cols, "measles_lab_confirmed")
-      if ("Epi Linked" %in% input$case_type) selected_cols <- c(selected_cols, "measles_epi_linked")
-      if ("Clinical" %in% input$case_type) selected_cols <- c(selected_cols, "measles_clinical")
+      if ("Lab Confirmed" %in% input$case_type) selected_cols <- c(selected_cols, "sum_lab_m")
+      if ("Epi Linked" %in% input$case_type) selected_cols <- c(selected_cols, "sum_epi_m")
+      if ("Clinical" %in% input$case_type) selected_cols <- c(selected_cols, "sum_clinic_m")
     }
     if ("Rubella" %in% input$disease) {
-      if ("Total" %in% input$case_type) selected_cols <- c(selected_cols, "rubella_total")
-      if ("Lab Confirmed" %in% input$case_type) selected_cols <- c(selected_cols, "rubella_lab_confirmed")
-      if ("Epi Linked" %in% input$case_type) selected_cols <- c(selected_cols, "rubella_epi_linked")
-      if ("Clinical" %in% input$case_type) selected_cols <- c(selected_cols, "rubella_clinical")
+      if ("Lab Confirmed" %in% input$case_type) selected_cols <- c(selected_cols, "sum_lab_r")
+      if ("Epi Linked" %in% input$case_type) selected_cols <- c(selected_cols, "sum_epi_r")
+      if ("Clinical" %in% input$case_type) selected_cols <- c(selected_cols, "sum_clinic_r")
+    }
+    if ("Both" %in% input$disease) {
+      if ("Lab Confirmed" %in% input$case_type) selected_cols <- c(selected_cols, "sum_lab")
+      if ("Epi Linked" %in% input$case_type) selected_cols <- c(selected_cols, "sum_epi")
+      if ("Clinical" %in% input$case_type) selected_cols <- c(selected_cols, "sum_clinic")
     }
 
     filtered <- filtered |>
       rowwise() |>
-      mutate(sum_m_r_selected = sum(c_across(all_of(selected_cols)), na.rm = TRUE)) |>
+      mutate(sum_selected = sum(c_across(all_of(selected_cols)), na.rm = TRUE)) |>
       ungroup()
 
     country_data <- filtered |>
       group_by(iso3) |>
-      summarise(sum_m_r_selected = sum(sum_m_r_selected, na.rm = TRUE), .groups = "drop")
+      summarise(sum_selected = sum(sum_selected, na.rm = TRUE), .groups = "drop")
 
     map_df <- world |>
       left_join(country_data, by = c("iso_a3" = "iso3"))
@@ -105,19 +112,21 @@ server <- function(input, output, session) {
     map_df <- map_df |>
       rowwise() |>
       mutate(
-        popup_text = if (length(input$disease) == 2) {
-          paste0("<b>", name, "</b><br>Measles and Rubella<br>Cases: ", sum_m_r_selected)
+        popup_text = if ("Rubella" %in% input$disease) {
+          paste0("<b>", name, "</b><br>Rubella<br>Cases: ", sum_selected)
         } else if ("Measles" %in% input$disease) {
-          paste0("<b>", name, "</b><br>Measles<br>Cases: ", sum_m_r_selected)
+          paste0("<b>", name, "</b><br>Measles<br>Cases: ", sum_selected)
         } else {
-          paste0("<b>", name, "</b><br>Rubella<br>Cases: ", sum_m_r_selected)
+          paste0("<b>", name, "</b><br>Measles and Rubella<br>Cases: ", sum_selected)
         }
       ) |>
       ungroup()
 
     pal <- colorNumeric(
-      palette = if (length(input$disease) == 2) "Purples" else if ("Measles" %in% input$disease) "Reds" else "Greens",
-      domain = map_df$sum_m_r_selected,
+      palette = if ("Rubella" %in% input$disease) {"Purples"} 
+      else if ("Measles" %in% input$disease) {"Reds"} 
+      else {"Greens"},
+      domain = map_df$sum_selected,
       na.color = "#f0f0f0"
     )
 
@@ -125,7 +134,7 @@ server <- function(input, output, session) {
       clearShapes() |>
       clearControls() |>
       addPolygons(
-        fillColor = ~pal(sum_m_r_selected),
+        fillColor = ~pal(sum_selected),
         fillOpacity = 0.7,
         color = "#444",
         weight = 0.5,
@@ -133,8 +142,8 @@ server <- function(input, output, session) {
       ) |>
       addLegend(
         pal = pal,
-        values = map_df$sum_m_r_selected,
-        title = "Cases",
+        values = map_df$sum_selected,
+        title = "Number of Cases",
         position = "bottomright"
       )
   })

@@ -61,7 +61,10 @@ summed_cases <- cases_year |>
         sum_clinic_r = sum(rubella_clinical, na.rm = TRUE),
         sum_pop_m = sum(measles_incidence_rate_per_1000000_total_population, na.rm = TRUE),
         sum_pop_r = sum(rubella_incidence_rate_per_1000000_total_population, na.rm = TRUE),
-        sum_pop_mr = sum_pop_r + sum_pop_m
+        sum_pop_mr = sum_pop_r + sum_pop_m,
+        sum_clinic = sum_clinic_m + sum_clinic_r,
+        sum_lab = sum_lab_m + sum_lab_r,
+        sum_epi = sum_epi_m + sum_epi_r
       )
 
 cases_year |>
