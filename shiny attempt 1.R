@@ -8,7 +8,7 @@ library(rnaturalearthdata)
 library(readr)
 
 
-cases <- read_csv("cases.csv") 
+cases <- read_csv("summed_cases.csv") 
 cases <- na.omit(cases)
 
 world <- ne_countries(scale = "medium", returnclass = "sf") |>
@@ -36,7 +36,7 @@ ui <- fluidPage(
         options = list(`actions-box` = TRUE)
       ),
       sliderInput(
-        inputId = "year",
+        inputId = "year_range",
         label = "Year",
         min = min(cases$year, na.rm = TRUE),
         max = max(cases$year, na.rm = TRUE),
@@ -75,10 +75,10 @@ server <- function(input, output, session) {
 
   observe({
     
-    req(input$disease, input$case_type, input$year)
+    req(input$disease, input$case_type, input$year_range)
 
     filtered <- cases |>
-      filter(year >= input$year[1], year <= input$year[2])
+      filter(year >= input$year_range[1], year <= input$year_range[2])
 
     selected_cols <- c()
     if ("Measles" %in% input$disease) {
@@ -104,23 +104,41 @@ server <- function(input, output, session) {
 
     country_data <- filtered |>
       group_by(iso3) |>
-      summarise(sum_selected = sum(sum_selected, na.rm = TRUE), .groups = "drop")
+      summarise(sum_selected = sum(sum_selected, na.rm = TRUE), .groups = "drop") 
 
     map_df <- world |>
-      left_join(country_data, by = c("iso_a3" = "iso3"))
+      full_join(country_data, by = c("iso_a3" = "iso3"))
+    
+    map_df[is.na(map_df)] <- 0
 
     map_df <- map_df |>
       rowwise() |>
       mutate(
         popup_text = if ("Rubella" %in% input$disease) {
-          paste0("<b>", name, "</b><br>Rubella<br>Cases: ", sum_selected)
+          paste0(
+            "<b>", name, "</b><br>",
+            input$year_range[1], " - ", input$year_range[2], "<br>",
+            "Rubella<br>Cases: ",
+            format(sum_selected, big.mark = ",", scientific = FALSE)
+          )
         } else if ("Measles" %in% input$disease) {
-          paste0("<b>", name, "</b><br>Measles<br>Cases: ", sum_selected)
+          paste0(
+            "<b>", name, "</b><br>",
+            input$year_range[1], " - ", input$year_range[2], "<br>",
+            "Measles<br>Cases: ",
+            format(sum_selected, big.mark = ",", scientific = FALSE)
+          )
         } else {
-          paste0("<b>", name, "</b><br>Measles and Rubella<br>Cases: ", sum_selected)
+          paste0(
+            "<b>", name, "</b><br>",
+            input$year_range[1], " - ", input$year_range[2], "<br>",
+            "Measles and Rubella<br>Cases: ",
+            format(sum_selected, big.mark = ",", scientific = FALSE)
+          )
         }
       ) |>
       ungroup()
+    
 
     pal <- colorNumeric(
       palette = if ("Rubella" %in% input$disease) {"Purples"} 

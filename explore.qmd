@@ -64,7 +64,9 @@ summed_cases <- cases_year |>
         sum_pop_mr = sum_pop_r + sum_pop_m,
         sum_clinic = sum_clinic_m + sum_clinic_r,
         sum_lab = sum_lab_m + sum_lab_r,
-        sum_epi = sum_epi_m + sum_epi_r
+        sum_epi = sum_epi_m + sum_epi_r,
+        year = year,
+        iso3 = iso3
       )
 
 cases_year |>
@@ -73,15 +75,16 @@ cases_year |>
     max_year = max(year)
   )
 
+summed_cases <- na.omit(summed_cases)
+
 write.csv(summed_cases, file = "summed_cases.csv", row.names = FALSE)
 ```
 
 ```{r}
-# Get the column names
-column_names <- colnames(cases)
+#| label: col-names
 
-# Print the result
+
+column_names <- colnames(cases)
 print(column_names)
-# Output: [1] "ID"   "Name" "Age"
 
 ```
