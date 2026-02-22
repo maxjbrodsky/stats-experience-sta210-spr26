@@ -70,9 +70,19 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE)
 
   output$map <- renderLeaflet({
-    leaflet(world) |> addTiles()
+    leaflet(
+      world,
+      options = leafletOptions(
+        minZoom = 2,
+        maxBounds = list(
+          c(-85, -180),
+          c(85, 180)
+        ),
+        maxBoundsViscosity = 1
+      )) |>
+      addProviderTiles(providers$CartoDB.Positron)
   })
-
+  
   observe({
     
     req(input$disease, input$case_type, input$year_range)

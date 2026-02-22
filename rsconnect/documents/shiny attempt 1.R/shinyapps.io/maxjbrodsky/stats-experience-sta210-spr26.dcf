@@ -1,0 +1,13 @@
+name: stats-experience-sta210-spr26
+title: stats-experience-sta210-spr26
+username: maxjbrodsky
+account: maxjbrodsky
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 16715569
+bundleId: 11603764
+url: https://maxjbrodsky.shinyapps.io/stats-experience-sta210-spr26/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: data dictionary|data dictionary - summed_cases|explore.html|explore.qmd|README.md|regression.html|regression.qmd
