@@ -1,8 +1,10 @@
-Create a GitHub repo for your TidyTuesday submission. Your repo should include
+map link: https://maxjbrodsky.shinyapps.io/stats-experience-sta210-spr26/
 
-The R Markdown file with all the code needed to reproduce your visualization.
-A README that includes an image of your final visualization and a short summary (~ 1 paragraph) about your visualization.
-✅ The visualization should include features or customization that are beyond what we’ve done in class .
+Summary:
+This interactive map allows viewers to explore the geographic patterns 
+of measles and rubella cases around the world directly rather than 
+trying to interpret them from tables or static plots. Users
+can filter cases by year, case type, and virus. Users can also also select 
+each country to view the exact number of cases based on the filter settings.
 
-✅ Include the link to your GitHub repo in the slide summarizing your experience.
 
